@@ -1,21 +1,28 @@
 Vagrant.configure("2") do |config|
+  #Base OS Configuration
   config.vm.box = "generic/ubuntu2004"
   config.ssh.insert_key = false
-  config.ssh.username = "vagrant"
-  config.vm.network "private_network", ip: "192.168.50.2"
-  config.vm.hostname = "wordpress"
   config.vm.synced_folder ".", "/vagrant"
-  config.vm.provider "virtualbox" do |vb|
-    vb.name = "wordpress"
-    vb.gui = false
-    vb.memory = 1024
-    vb.linked_clone = false
+  config.ssh.username = "vagrant"
+
+  #General VM Config
+  config.vm.provider "virtualbox" do |v|
+    v.name = "ansible-slave0"
+    v.gui = false
+    v.memory = 1024
+    v.linked_clone = false
   end
 
-  config.vm.provision "ansible_local" do |ansible|
-    ansible.playbook = "wordpress.yaml"
-    ansible.pip_install_cmd = "sudo apt-get install -y python3-distutils && curl -s https://bootstrap.pypa.io/get-pip.py | sudo python3"
-    ansible.verbose="v"
-    ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
+  #Ansible Slave 0
+  config.vm.define "ansible-slave0" do |ansibleslave0|
+    ansibleslave0.vm.network "private_network", ip: "192.168.50.2"
+    ansibleslave0.vm.hostname = "ansible-slave0"
   end
+
+  #Ansible Slave 1
+  config.vm.define "ansible-slave1" do |ansibleslave1|
+    ansibleslave1.vm.network "private_network", ip: "192.168.50.3"
+    ansibleslave1.vm.hostname = "ansible-slave1"
+  end
+
 end
